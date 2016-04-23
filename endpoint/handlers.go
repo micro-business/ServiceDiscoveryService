@@ -7,9 +7,9 @@ import (
 
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/microbusinesses/Micro-Businesses-Core/common/diagnostics"
-	businessContract "github.com/microbusinesses/ServiceDiscovery/business/contract"
-	"github.com/microbusinesses/ServiceDiscovery/config"
-	"github.com/microbusinesses/ServiceDiscovery/endpoint/transport"
+	businessContract "github.com/microbusinesses/ServiceDiscoveryService/business/contract"
+	"github.com/microbusinesses/ServiceDiscoveryService/config"
+	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/transport"
 	"golang.org/x/net/context"
 )
 

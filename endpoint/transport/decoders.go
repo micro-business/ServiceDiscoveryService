@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/microbusinesses/ServiceDiscovery/endpoint/message"
+	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/message"
 )
 
 func DecodeResolveServiceRequest(httpRequest *http.Request) (interface{}, error) {

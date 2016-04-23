@@ -14,7 +14,7 @@ type ConsulConfigurationReader struct {
 	ListeningPortToOverride int
 }
 
-const serviceListeningPortKey = "services/service-discovery/endpoint/listening-port"
+const serviceListeningPortKey = "services/service-discovery-service/endpoint/listening-port"
 
 func (consul ConsulConfigurationReader) GetListeningPort() (int, error) {
 	if consul.ListeningPortToOverride != 0 {

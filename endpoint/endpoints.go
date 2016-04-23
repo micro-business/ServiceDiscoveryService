@@ -3,8 +3,8 @@ package endpoint
 import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/microbusinesses/Micro-Businesses-Core/system"
-	"github.com/microbusinesses/ServiceDiscovery/business/contract"
-	"github.com/microbusinesses/ServiceDiscovery/endpoint/message"
+	"github.com/microbusinesses/ServiceDiscoveryService/business/contract"
+	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/message"
 	"golang.org/x/net/context"
 )
 

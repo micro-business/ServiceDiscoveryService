@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"github.com/microbusinesses/Micro-Businesses-Core/common/diagnostics"
-	businessService "github.com/microbusinesses/ServiceDiscovery/business/service"
-	"github.com/microbusinesses/ServiceDiscovery/config"
-	"github.com/microbusinesses/ServiceDiscovery/endpoint"
+	businessService "github.com/microbusinesses/ServiceDiscoveryService/business/service"
+	"github.com/microbusinesses/ServiceDiscoveryService/config"
+	"github.com/microbusinesses/ServiceDiscoveryService/endpoint"
 )
 
 var consulAddress string

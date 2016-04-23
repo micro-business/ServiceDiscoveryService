@@ -27,7 +27,7 @@ func main() {
 
 	endpoint := endpoint.Endpoint{ConfigurationReader: consulConfigurationReader}
 
-	serviceDiscoveryService := businessService.ConsulServiceDiscoveryService{}
+	serviceDiscoveryService := businessService.ConsulServiceDiscoveryService{ConsulAddress: consulAddress, ConsulScheme: consulScheme}
 
 	endpoint.ServiceDiscoveryService = serviceDiscoveryService
 

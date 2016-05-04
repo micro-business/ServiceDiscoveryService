@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"golang.org/x/net/context"
+
 	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/message"
 )
 
-func DecodeResolveServiceRequest(httpRequest *http.Request) (interface{}, error) {
+func DecodeResolveServiceRequest(context context.Context, httpRequest *http.Request) (interface{}, error) {
 	var request message.ResolveServiceRequest
 
 	if err := json.NewDecoder(httpRequest.Body).Decode(&request); err != nil {

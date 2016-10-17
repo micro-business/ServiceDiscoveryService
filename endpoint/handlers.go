@@ -14,54 +14,47 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Endpoint implements method to start the service. The structure contains all the dependencies required by the Endpoint service.
 type Endpoint struct {
 	ConfigurationReader     config.ConfigurationReader
 	ServiceDiscoveryService businessContract.ServiceDiscoveryService
 }
 
+// StartServer creates all the endpoints and starts the server.
 func (endpoint Endpoint) StartServer() {
 	diagnostics.IsNotNil(endpoint.ServiceDiscoveryService, "endpoint.ServiceDiscoveryService", "ServiceDiscoveryService must be provided.")
 	diagnostics.IsNotNil(endpoint.ConfigurationReader, "endpoint.ConfigurationReader", "ConfigurationReader must be provided.")
-
 	ctx := context.Background()
 
-	if handlers, err := getHandlers(endpoint, ctx); err != nil {
+	handlers := getHandlers(endpoint, ctx)
+	http.HandleFunc("/CheckHealth", checkHealthHandleFunc)
+
+	for pattern, handler := range handlers {
+		http.Handle(pattern, handler)
+	}
+
+	if listeningPort, err := endpoint.ConfigurationReader.GetListeningPort(); err != nil {
 		log.Fatal(err.Error())
 	} else {
-		http.HandleFunc("/CheckHealth", checkHealthHandleFunc)
-
-		for pattern, handler := range handlers {
-			http.Handle(pattern, handler)
-		}
-
-		if listeningPort, err := endpoint.ConfigurationReader.GetListeningPort(); err != nil {
-			log.Fatal(err.Error())
-		} else {
-			log.Fatal(http.ListenAndServe(":"+strconv.Itoa(listeningPort), nil))
-		}
+		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(listeningPort), nil))
 	}
 }
 
-func getHandlers(endpoint Endpoint, ctx context.Context) (map[string]http.Handler, error) {
+func getHandlers(endpoint Endpoint, ctx context.Context) map[string]http.Handler {
 	handlers := make(map[string]http.Handler)
+	handlers["/ResolveService"] = createResolveServiceHandler(endpoint, ctx)
 
-	if handler, err := createResolveServiceHandler(endpoint, ctx); err != nil {
-		return map[string]http.Handler{}, err
-	} else {
-		handlers["/ResolveService"] = handler
-	}
-
-	return handlers, nil
+	return handlers
 }
 
 func checkHealthHandleFunc(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintln(writer, "Alive")
 }
 
-func createResolveServiceHandler(endpoint Endpoint, ctx context.Context) (http.Handler, error) {
+func createResolveServiceHandler(endpoint Endpoint, ctx context.Context) http.Handler {
 	return httptransport.NewServer(
 		ctx,
 		createResolveServiceEndpoint(endpoint.ServiceDiscoveryService),
 		transport.DecodeResolveServiceRequest,
-		transport.EncodeResolveServiceResponse), nil
+		transport.EncodeResolveServiceResponse)
 }

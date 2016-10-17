@@ -34,20 +34,20 @@ func (consulServiceDiscoveryService ConsulServiceDiscoveryService) ResolveServic
 		return nil, err
 	}
 
-	checks, _, err := client.Health().Service(serviceName, "", true, nil)
+	serviceEntries, _, err := client.Health().Service(serviceName, "", true, nil)
 
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]contract.DiscoveredServiceInfo, len(checks))
+	result := make([]contract.DiscoveredServiceInfo, len(serviceEntries))
 	overrideHostname, _ := consulServiceDiscoveryService.ConfigurationReader.GetOverrideHostname()
 
-	for _, check := range checks {
+	for _, serviceEntry := range serviceEntries {
 		if len(overrideHostname) == 0 {
-			result = append(result, contract.DiscoveredServiceInfo{check.Service.Address, check.Service.Port})
+			result = append(result, contract.DiscoveredServiceInfo{serviceEntry.Service.Address, serviceEntry.Service.Port})
 		} else {
-			result = append(result, contract.DiscoveredServiceInfo{overrideHostname, check.Service.Port})
+			result = append(result, contract.DiscoveredServiceInfo{overrideHostname, serviceEntry.Service.Port})
 		}
 	}
 

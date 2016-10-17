@@ -46,21 +46,21 @@ var rootQueryType = graphql.NewObject(
 					executionContext := resolveParams.Context.Value("ExecutionContext").(executionContext)
 					serviceName, _ := resolveParams.Args["serviceName"].(string)
 
-					var returnedDiscoveredServicesInfo []contract.DiscoveredServiceInfo
+					var servicesInfo []contract.DiscoveredServiceInfo
 					var err error
 
-					if returnedDiscoveredServicesInfo, err = executionContext.serviceDiscoveryService.ResolveService(
+					if servicesInfo, err = executionContext.serviceDiscoveryService.ResolveService(
 						serviceName); err != nil {
 						return nil, err
 					}
 
-					discoveredServicesInfo := make([]discoveredServiceInfo, len(returnedDiscoveredServicesInfo))
+					result := make([]discoveredServiceInfo, len(servicesInfo))
 
-					for _, serviceInfo := range returnedDiscoveredServicesInfo {
-						discoveredServicesInfo = append(discoveredServicesInfo, discoveredServiceInfo{serviceInfo.Address, serviceInfo.Port})
+					for _, serviceInfo := range servicesInfo {
+						result = append(result, discoveredServiceInfo{serviceInfo.Address, serviceInfo.Port})
 					}
 
-					return discoveredServicesInfo, nil
+					return result, nil
 
 				},
 			},

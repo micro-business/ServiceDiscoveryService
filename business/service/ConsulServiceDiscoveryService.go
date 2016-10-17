@@ -40,16 +40,33 @@ func (consulServiceDiscoveryService ConsulServiceDiscoveryService) ResolveServic
 		return nil, err
 	}
 
-	result := make([]contract.DiscoveredServiceInfo, len(serviceEntries))
+	result := make([]contract.DiscoveredServiceInfo, 0, len(serviceEntries))
 	overrideHostname, _ := consulServiceDiscoveryService.ConfigurationReader.GetOverrideHostname()
 
 	for _, serviceEntry := range serviceEntries {
+		var serviceInfo contract.DiscoveredServiceInfo
+
 		if len(overrideHostname) == 0 {
-			result = append(result, contract.DiscoveredServiceInfo{serviceEntry.Service.Address, serviceEntry.Service.Port})
+			serviceInfo = contract.DiscoveredServiceInfo{serviceEntry.Service.Address, serviceEntry.Service.Port}
 		} else {
-			result = append(result, contract.DiscoveredServiceInfo{overrideHostname, serviceEntry.Service.Port})
+			serviceInfo = contract.DiscoveredServiceInfo{overrideHostname, serviceEntry.Service.Port}
+		}
+
+		// Ignoring duplicated result
+		if !isServiceInfoAlreadyInList(result, serviceInfo) {
+			result = append(result, serviceInfo)
 		}
 	}
 
 	return result, nil
+}
+
+func isServiceInfoAlreadyInList(servicesInfo []contract.DiscoveredServiceInfo, serviceInfo contract.DiscoveredServiceInfo) bool {
+	for _, info := range servicesInfo {
+		if info == serviceInfo {
+			return true
+		}
+	}
+
+	return false
 }

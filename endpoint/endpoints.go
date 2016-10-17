@@ -54,7 +54,7 @@ var rootQueryType = graphql.NewObject(
 						return nil, err
 					}
 
-					result := make([]discoveredServiceInfo, len(servicesInfo))
+					result := make([]discoveredServiceInfo, 0, len(servicesInfo))
 
 					for _, serviceInfo := range servicesInfo {
 						result = append(result, discoveredServiceInfo{serviceInfo.Address, serviceInfo.Port})

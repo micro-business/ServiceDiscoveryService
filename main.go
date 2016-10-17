@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/microbusinesses/Micro-Businesses-Core/common/diagnostics"
-	businessService "github.com/microbusinesses/ServiceDiscoveryService/business/service"
+	"github.com/microbusinesses/ServiceDiscoveryService/business/service"
 	"github.com/microbusinesses/ServiceDiscoveryService/config"
 	"github.com/microbusinesses/ServiceDiscoveryService/endpoint"
 )
@@ -29,7 +29,7 @@ func main() {
 
 	endpoint := endpoint.Endpoint{ConfigurationReader: consulConfigurationReader}
 
-	serviceDiscoveryService := businessService.ConsulServiceDiscoveryService{ConsulAddress: consulAddress, ConsulScheme: consulScheme, ConfigurationReader: consulConfigurationReader}
+	serviceDiscoveryService := service.ConsulServiceDiscoveryService{ConsulAddress: consulAddress, ConsulScheme: consulScheme, ConfigurationReader: consulConfigurationReader}
 
 	endpoint.ServiceDiscoveryService = serviceDiscoveryService
 

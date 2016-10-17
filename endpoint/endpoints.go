@@ -1,23 +1,103 @@
 package endpoint
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/go-kit/kit/endpoint"
+	"github.com/graphql-go/graphql"
 	"github.com/microbusinesses/ServiceDiscoveryService/business/contract"
-	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/message"
 	"golang.org/x/net/context"
 )
 
-func createResolveServiceEndpoint(service contract.ServiceDiscoveryService) endpoint.Endpoint {
+const (
+	address = "Address"
+	port    = "Port"
+)
+
+type discoveredServiceInfo struct {
+	Address string `json:"Address"`
+	Port    int    `json:"Port"`
+}
+
+var discoveredServiceInfoType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "Address",
+		Fields: graphql.Fields{
+			address: &graphql.Field{Type: graphql.String},
+			port:    &graphql.Field{Type: graphql.String},
+		},
+	},
+)
+
+var rootQueryType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "RootQuery",
+		Fields: graphql.Fields{
+			"servicesInfo": &graphql.Field{
+				Type:        graphql.NewList(discoveredServiceInfoType),
+				Description: "Returns the list of discovered services in the network",
+				Args: graphql.FieldConfigArgument{
+					"serviceName": &graphql.ArgumentConfig{
+						Type: graphql.NewNonNull(graphql.String),
+					},
+				},
+				Resolve: func(resolveParams graphql.ResolveParams) (interface{}, error) {
+					executionContext := resolveParams.Context.Value("ExecutionContext").(executionContext)
+					serviceName, _ := resolveParams.Args["serviceName"].(string)
+
+					var returnedDiscoveredServicesInfo []contract.DiscoveredServiceInfo
+					var err error
+
+					if returnedDiscoveredServicesInfo, err = executionContext.serviceDiscoveryService.ResolveService(
+						serviceName); err != nil {
+						return nil, err
+					}
+
+					discoveredServicesInfo := make([]discoveredServiceInfo, len(returnedDiscoveredServicesInfo))
+
+					for _, serviceInfo := range returnedDiscoveredServicesInfo {
+						discoveredServicesInfo = append(discoveredServicesInfo, discoveredServiceInfo{serviceInfo.Address, serviceInfo.Port})
+					}
+
+					return discoveredServicesInfo, nil
+
+				},
+			},
+		},
+	},
+)
+
+var serviceDiscoveryServiceSchema, _ = graphql.NewSchema(graphql.SchemaConfig{Query: rootQueryType})
+
+type executionContext struct {
+	serviceDiscoveryService contract.ServiceDiscoveryService
+}
+
+func createAPIEndpoint(serviceDiscoveryService contract.ServiceDiscoveryService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(message.ResolveServiceRequest)
 
-		serviceAddresses, err := service.ResolveService(req.ServiceName)
+		result := executeQuery(request.(string), serviceDiscoveryService)
 
-		if err != nil {
-			return message.ResolveServiceResponse{nil, err.Error()}, err
+		if result.HasErrors() {
+			errorMessages := []string{}
+
+			for _, err := range result.Errors {
+				errorMessages = append(errorMessages, err.Error())
+			}
+
+			return nil, errors.New(strings.Join(errorMessages, "\n"))
 		}
 
-		return message.ResolveServiceResponse{serviceAddresses, ""}, nil
-
+		return result, nil
 	}
+}
+
+func executeQuery(query string, serviceDiscoveryService contract.ServiceDiscoveryService) *graphql.Result {
+	return graphql.Do(
+		graphql.Params{
+			Schema:        serviceDiscoveryServiceSchema,
+			RequestString: query,
+			Context:       context.WithValue(context.Background(), "ExecutionContext", executionContext{serviceDiscoveryService}),
+		})
 }

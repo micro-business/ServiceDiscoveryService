@@ -24,6 +24,7 @@ type Endpoint struct {
 func (endpoint Endpoint) StartServer() {
 	diagnostics.IsNotNil(endpoint.ServiceDiscoveryService, "endpoint.ServiceDiscoveryService", "ServiceDiscoveryService must be provided.")
 	diagnostics.IsNotNil(endpoint.ConfigurationReader, "endpoint.ConfigurationReader", "ConfigurationReader must be provided.")
+
 	ctx := context.Background()
 
 	handlers := getHandlers(endpoint, ctx)
@@ -42,7 +43,7 @@ func (endpoint Endpoint) StartServer() {
 
 func getHandlers(endpoint Endpoint, ctx context.Context) map[string]http.Handler {
 	handlers := make(map[string]http.Handler)
-	handlers["/ResolveService"] = createResolveServiceHandler(endpoint, ctx)
+	handlers["/Api"] = createAPIHandler(endpoint, ctx)
 
 	return handlers
 }
@@ -51,10 +52,10 @@ func checkHealthHandleFunc(writer http.ResponseWriter, request *http.Request) {
 	fmt.Fprintln(writer, "Alive")
 }
 
-func createResolveServiceHandler(endpoint Endpoint, ctx context.Context) http.Handler {
+func createAPIHandler(endpoint Endpoint, ctx context.Context) http.Handler {
 	return httptransport.NewServer(
 		ctx,
-		createResolveServiceEndpoint(endpoint.ServiceDiscoveryService),
-		transport.DecodeResolveServiceRequest,
-		transport.EncodeResolveServiceResponse)
+		createAPIEndpoint(endpoint.ServiceDiscoveryService),
+		transport.DecodeAPIRequest,
+		transport.EncodeAPIResponse)
 }

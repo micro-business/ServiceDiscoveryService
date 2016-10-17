@@ -7,7 +7,8 @@ import (
 	"golang.org/x/net/context"
 )
 
-func EncodeResolveServiceResponse(context context.Context, writer http.ResponseWriter, response interface{}) error {
+// EncodeAPIResponse encodes the response message before sending back to the client
+func EncodeAPIResponse(context context.Context, writer http.ResponseWriter, response interface{}) error {
 	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "POST")

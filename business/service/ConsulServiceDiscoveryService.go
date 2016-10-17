@@ -1,10 +1,9 @@
 package service
 
 import (
-	"strconv"
-
 	"github.com/hashicorp/consul/api"
 	"github.com/microbusinesses/Micro-Businesses-Core/common/diagnostics"
+	"github.com/microbusinesses/ServiceDiscoveryService/business/contract"
 	"github.com/microbusinesses/ServiceDiscoveryService/config"
 )
 
@@ -17,12 +16,10 @@ type ConsulServiceDiscoveryService struct {
 
 // ResolveService resolves the provided service name by returning the list of services providing the same functionality.
 // serviceName: Mandatory. The name of the service to resolve
-// Returns either the collection if available service addresses or error if something goes wrong.
-func (consulServiceDiscoveryService ConsulServiceDiscoveryService) ResolveService(serviceName string) ([]string, error) {
+// Returns either the collection of available service information or error if something goes wrong.
+func (consulServiceDiscoveryService ConsulServiceDiscoveryService) ResolveService(serviceName string) ([]contract.DiscoveredServiceInfo, error) {
 	diagnostics.IsNotNil(consulServiceDiscoveryService.ConfigurationReader, "consulServiceDiscoveryService.ConfigurationReader", "ConfigurationReader must be provided.")
 	diagnostics.IsNotNilOrEmptyOrWhitespace(serviceName, "serviceName", "serviceName must be provided. Cannot be nil, empty or contains whitespace character only.")
-
-	var serviceAddresses []string
 
 	config := api.DefaultConfig()
 
@@ -43,16 +40,16 @@ func (consulServiceDiscoveryService ConsulServiceDiscoveryService) ResolveServic
 		return nil, err
 	}
 
-	serviceAddresses = make([]string, len(checks))
+	discoveredServicesInfo := make([]contract.DiscoveredServiceInfo, len(checks))
 	overrideHostname, _ := consulServiceDiscoveryService.ConfigurationReader.GetOverrideHostname()
 
-	for idx, check := range checks {
+	for _, check := range checks {
 		if len(overrideHostname) == 0 {
-			serviceAddresses[idx] = check.Service.Address + ":" + strconv.Itoa(check.Service.Port)
+			discoveredServicesInfo = append(discoveredServicesInfo, contract.DiscoveredServiceInfo{check.Service.Address, check.Service.Port})
 		} else {
-			serviceAddresses[idx] = overrideHostname + ":" + strconv.Itoa(check.Service.Port)
+			discoveredServicesInfo = append(discoveredServicesInfo, contract.DiscoveredServiceInfo{overrideHostname, check.Service.Port})
 		}
 	}
 
-	return serviceAddresses, nil
+	return discoveredServicesInfo, nil
 }

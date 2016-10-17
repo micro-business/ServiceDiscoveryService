@@ -1,20 +1,24 @@
 package transport
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	"golang.org/x/net/context"
-
-	"github.com/microbusinesses/ServiceDiscoveryService/endpoint/message"
 )
 
-func DecodeResolveServiceRequest(context context.Context, httpRequest *http.Request) (interface{}, error) {
-	var request message.ResolveServiceRequest
+// DecodeAPIRequest decodes the request message sent by the client. The request message can be sent using GET method as part of
+// URL or can be the payload of a POST HTTP message.
+func DecodeAPIRequest(context context.Context, httpRequest *http.Request) (interface{}, error) {
+	if httpRequest.Method == "GET" {
+		return httpRequest.URL.Query()["query"][0], nil
+	}
 
-	if err := json.NewDecoder(httpRequest.Body).Decode(&request); err != nil {
+	query, err := ioutil.ReadAll(httpRequest.Body)
+
+	if err != nil {
 		return nil, err
 	}
 
-	return request, nil
+	return string(query), nil
 }

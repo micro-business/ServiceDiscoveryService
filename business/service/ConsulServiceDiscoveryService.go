@@ -2,9 +2,9 @@ package service
 
 import (
 	"github.com/hashicorp/consul/api"
-	"github.com/microbusinesses/Micro-Businesses-Core/common/diagnostics"
-	"github.com/microbusinesses/ServiceDiscoveryService/business/contract"
-	"github.com/microbusinesses/ServiceDiscoveryService/config"
+	"github.com/micro-business/Micro-Business-Core/common/diagnostics"
+	"github.com/micro-business/ServiceDiscoveryService/business/contract"
+	"github.com/micro-business/ServiceDiscoveryService/config"
 )
 
 // ConsulServiceDiscoveryService uses Consul to resolve available  services in the network.

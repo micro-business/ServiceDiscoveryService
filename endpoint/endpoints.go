@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/graphql-go/graphql"
-	"github.com/microbusinesses/ServiceDiscoveryService/business/contract"
+	"github.com/micro-business/ServiceDiscoveryService/business/contract"
 	"golang.org/x/net/context"
 )
 
